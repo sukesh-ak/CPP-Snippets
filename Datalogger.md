@@ -1,9 +1,10 @@
 # Simple Datalogger C++ class
 
 
-Try the snippet [here](https://godbolt.org/z/814jb8s7b) powered by `godbolt.org`
+Try the snippet [here](https://godbolt.org/z/GzxPMbvGh) powered by `godbolt.org`
 
 ```c++
+
 /*
     Simple Data logging class in C++
 */
@@ -19,7 +20,10 @@ class DataLogger {
     using ErrorEventHandler = std::function<void(const std::string& ErrorString)>;
 
     // Declare a virtual method to add an event handler to the log event
-    virtual void SetErrorEventHandler(ErrorEventHandler handler) = 0;
+    virtual void SetErrorEventHandler(ErrorEventHandler handler) {
+        // set the error event handler
+        errorHandler = handler;
+    };
 
     // Setup - start file or device
     virtual bool Setup() = 0;   
@@ -29,17 +33,16 @@ class DataLogger {
 
     // Flush content
     virtual void Flush() = 0;
+
+protected:
+    // Declare a private variable to hold registered error event handler
+    ErrorEventHandler errorHandler;
 };
 
+/* Derived Class */
 class SDLogger : public DataLogger
 {
 public:
-    // Implement the SetErrorEventHandler method for the derived class
-    void SetErrorEventHandler(ErrorEventHandler handler) override
-    {
-        // set the error event handler
-        errorHandler = handler;
-    }
 
     bool Setup() override {
         fmt::print("SD Setup\n");
@@ -54,21 +57,12 @@ public:
         fmt::print("SD Flush\n");
         if (errorHandler) errorHandler("SD:Error while flushing");
     };
-
-private:
-    // Declare a private variable to hold registered error event handler
-    ErrorEventHandler errorHandler;
 };
 
+/* Derived Class */
 class SerialLogger : public DataLogger
 {
 public:
-    // Implement the SetErrorEventHandler method for the derived class
-    void SetErrorEventHandler(ErrorEventHandler handler) override
-    {
-        // set the error event handler
-        errorHandler = handler;
-    }
 
     bool Setup() override {
         fmt::print("Serial Setup\n");
@@ -83,10 +77,6 @@ public:
         fmt::print("Serial Flush\n");
         if (errorHandler) errorHandler("Serial:Error while flushing");
     };
-
-private:
-    // Declare a private variable to hold registered error event handler
-    ErrorEventHandler errorHandler;
 };
 
 void OnError(const std::string& ErrorString){
@@ -115,6 +105,5 @@ int main() {
 
     fmt::print("\nDone!");
 }
-
 
 ```
